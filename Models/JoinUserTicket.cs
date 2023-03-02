@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SupportTicketSystem.Models
 {
@@ -8,12 +7,10 @@ namespace SupportTicketSystem.Models
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey("UserId")]
-        public int UserId { get; set; }
-        public virtual User User { get; set; }
+        public int? UserId { get; set; }
+        public User InvolvedUser { get; set; }
 
-        [ForeignKey("TicketId")]
         public int TicketId { get; set; }
-        public virtual Ticket Ticket { get; set; }
+        public Ticket Ticket { get; set; }
     }
 }

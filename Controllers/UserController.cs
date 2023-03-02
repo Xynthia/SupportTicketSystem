@@ -15,33 +15,51 @@ namespace SupportTicketSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ServiceResponse<List<User>>>> GetAll()
+        public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> GetAll()
         {
-            return Ok(_userService.GetAll());
+            return Ok(await _userService.GetAll());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceResponse<User>>> GetById(int id)
+        public async Task<ActionResult<ServiceResponse<GetUserDto>>> GetById(int id)
         {
-            return Ok(_userService.GetById(id)); 
+            return Ok(await _userService.GetById(id)); 
+        }
+
+        [HttpGet("{id}/Tickets")]
+        public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> GetAllTickets(int id)
+        {
+            return Ok(await _userService.GetAllTickets(id));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServiceResponse<User>>> Add(AddUserDto newUser)
+        public async Task<ActionResult<ServiceResponse<GetUserDto>>> Add(AddUserDto newUser)
         {
-            return Ok(_userService.Add(newUser));
+            return Ok(await _userService.Add(newUser));
         }
 
         [HttpDelete]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> Delete(int id)
         {
-            return Ok(_userService.Delete(id));
+            return Ok(await _userService.Delete(id));
         }
 
         [HttpPut]
-        public async Task<ActionResult<ServiceResponse<User>>> Update(UpdateUserDto updateUser)
+        public async Task<ActionResult<ServiceResponse<GetUserDto>>> Update(int id, UpdateUserDto updateUser)
         {
-            return Ok(_userService.Update(updateUser)); 
+            return Ok(await _userService.Update(id, updateUser)); 
+        }
+
+        [HttpPut("{id}/SecretView/True")]
+        public async Task<ActionResult<ServiceResponse<GetUserDto>>> UpdateSecretViewTrue(int id)
+        {
+            return Ok(await _userService.UpdateSecretView(id, true));
+        }
+
+        [HttpPut("{id}/SecretView/False")]
+        public async Task<ActionResult<ServiceResponse<GetUserDto>>> UpdateSecretViewFalse(int id)
+        {
+            return Ok(await _userService.UpdateSecretView(id, false));
         }
     }
 }
