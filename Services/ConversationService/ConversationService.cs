@@ -19,7 +19,7 @@ namespace SupportTicketSystem.Services.ConversationService
         public async Task<ServiceResponse<List<GetConversationDto>>> Add(AddConversationDto newConversation)
         {
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
-            var conversation = _mapper.Map<GetConversationDto>(newConversation);
+            var conversation = _mapper.Map<Conversation>(newConversation);
             await _dataContext.AddAsync(conversation);
             await _dataContext.SaveChangesAsync();
             serviceResponse.Data = await _dataContext.Conversation.Select(c => _mapper.Map<GetConversationDto>(c)).ToListAsync();

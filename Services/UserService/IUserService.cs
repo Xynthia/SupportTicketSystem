@@ -1,4 +1,5 @@
-﻿using SupportTicketSystem.Dtos.Ticket;
+﻿using SupportTicketSystem.Dtos.JoinUserTicket;
+using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
 
 namespace SupportTicketSystem.Services.UserService
@@ -10,7 +11,8 @@ namespace SupportTicketSystem.Services.UserService
         Task<ServiceResponse<List<GetUserDto>>> Add(AddUserDto newUser);
         Task<ServiceResponse<GetUserDto>> Update(int id, UpdateUserDto updateUser);
         Task<ServiceResponse<List<GetUserDto>>> Delete(int id);
-        Task<ServiceResponse<List<GetTicketDto>>> GetAllTickets(int id);
+        Task<ServiceResponse<List<GetTicketDto>>> GetAllCreatedTickets(int id);
+        Task<ServiceResponse<List<GetJoinUserTicketDto>>> GetAllInvolvedTickets(int id);
         Task<ServiceResponse<GetUserDto>> UpdateSecretView(int id, bool secretview);
         
     }

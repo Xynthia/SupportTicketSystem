@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
+using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
 
@@ -111,7 +112,7 @@ namespace SupportTicketSystem.Services.UserService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<List<GetTicketDto>>> GetAllTickets(int id)
+        public async Task<ServiceResponse<List<GetTicketDto>>> GetAllCreatedTickets(int id)
         {
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
             
@@ -121,5 +122,18 @@ namespace SupportTicketSystem.Services.UserService
 
             return serviceResponse;
         }
+
+        public async Task<ServiceResponse<List<GetJoinUserTicketDto>>> GetAllInvolvedTickets(int id)
+        {
+            var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
+
+            List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.Where(t => id == t.UserId).ToListAsync();
+
+            serviceResponse.Data = _mapper.Map<List<GetJoinUserTicketDto>>(involvedUsers);
+
+            return serviceResponse;
+        }
+
+
     }
 }

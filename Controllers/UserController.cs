@@ -26,10 +26,16 @@ namespace SupportTicketSystem.Controllers
             return Ok(await _userService.GetById(id)); 
         }
 
-        [HttpGet("{id}/Tickets")]
+        [HttpGet("{id}/Tickets/Created")]
+        public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> GetAllCreatedTickets(int id)
+        {
+            return Ok(await _userService.GetAllCreatedTickets(id));
+        }
+
+        [HttpGet("{id}/Tickets/Involved")]
         public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> GetAllTickets(int id)
         {
-            return Ok(await _userService.GetAllTickets(id));
+            return Ok(await _userService.GetAllInvolvedTickets(id));
         }
 
         [HttpPost]
@@ -41,25 +47,45 @@ namespace SupportTicketSystem.Controllers
         [HttpDelete]
         public async Task<ActionResult<ServiceResponse<List<GetUserDto>>>> Delete(int id)
         {
-            return Ok(await _userService.Delete(id));
+            var serviceResponse = await _userService.Delete(id);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
 
         [HttpPut]
         public async Task<ActionResult<ServiceResponse<GetUserDto>>> Update(int id, UpdateUserDto updateUser)
         {
-            return Ok(await _userService.Update(id, updateUser)); 
+            var serviceResponse = await _userService.Update(id, updateUser);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
 
         [HttpPut("{id}/SecretView/True")]
         public async Task<ActionResult<ServiceResponse<GetUserDto>>> UpdateSecretViewTrue(int id)
         {
-            return Ok(await _userService.UpdateSecretView(id, true));
+            var serviceResponse = await _userService.UpdateSecretView(id, true);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
 
         [HttpPut("{id}/SecretView/False")]
         public async Task<ActionResult<ServiceResponse<GetUserDto>>> UpdateSecretViewFalse(int id)
         {
-            return Ok(await _userService.UpdateSecretView(id, false));
+            var serviceResponse = await _userService.UpdateSecretView(id, false);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
         }
     }
 }

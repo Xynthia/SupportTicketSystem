@@ -3,6 +3,8 @@ global using SupportTicketSystem.Services.UserService;
 global using SupportTicketSystem.Services.TicketService;
 using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
+using SupportTicketSystem.Services.ConversationService;
+using SupportTicketSystem.Services.JoinUserTicketService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<IJoinUserTicketService, JoinUserTicketService>();
 
 builder.Services.AddDbContext<DataContext>();
 

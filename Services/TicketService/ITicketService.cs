@@ -1,4 +1,5 @@
-﻿using SupportTicketSystem.Dtos.Ticket;
+﻿using SupportTicketSystem.Dtos.JoinUserTicket;
+using SupportTicketSystem.Dtos.Ticket;
 
 namespace SupportTicketSystem.Services.TicketService
 {
@@ -10,5 +11,6 @@ namespace SupportTicketSystem.Services.TicketService
         Task<ServiceResponse<GetTicketDto>> Update(int id, UpdateTicketDto updateTicket);
         Task<ServiceResponse<List<GetTicketDto>>> Delete(int id);
         Task<ServiceResponse<GetTicketDto>> UpdateStatus(int id, UpdateTicketDto updateTicket);
+        Task<ServiceResponse<List<GetJoinUserTicketDto>>> AddUsersInvolved(AddJoinUserTicketDto newJoinUserTicket);
     }
 }
