@@ -4,6 +4,9 @@ using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
+using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
+using SupportTicketSystem.Services.TicketService.ExtensionMethods;
+using SupportTicketSystem.Services.UserService.ExtensionMethods;
 
 namespace SupportTicketSystem.Services.UserService
 {
@@ -25,12 +28,9 @@ namespace SupportTicketSystem.Services.UserService
             User user = _mapper.Map<User>(newUser);
 
             await _dataContext.User.AddAsync(user);
-
             await _dataContext.SaveChangesAsync();
 
-            serviceResponse.Data = await _dataContext.User.Select(u => _mapper.Map<GetUserDto>(u)).ToListAsync();
-
-            return serviceResponse;
+            return serviceResponse = await GetAll();
         }
 
         public async Task<ServiceResponse<List<GetUserDto>>> Delete(int id)
@@ -39,9 +39,11 @@ namespace SupportTicketSystem.Services.UserService
             try
             {
                 var user = await _dataContext.User.FirstAsync(u => u.Id == id);
+
                 _dataContext.User.Remove(user);
                 await _dataContext.SaveChangesAsync();
-                serviceRepsonse.Data = await _dataContext.User.Select(u => _mapper.Map<GetUserDto>(u)).ToListAsync();
+
+                serviceRepsonse = await GetAll();
             }
             catch (Exception ex)
             {
@@ -54,15 +56,20 @@ namespace SupportTicketSystem.Services.UserService
         public async Task<ServiceResponse<List<GetUserDto>>> GetAll()
         {
             var serviceRespone = new ServiceResponse<List<GetUserDto>>();
-            serviceRespone.Data = await _dataContext.User.Select(c => _mapper.Map<GetUserDto>(c)).ToListAsync();
+
+            serviceRespone.Data = await _dataContext.User.GetUserDtoFromQuery(_mapper);
+
             return serviceRespone;
         }
 
         public async Task<ServiceResponse<GetUserDto>> GetById(int id)
         {
             var serviceResponse = new ServiceResponse<GetUserDto>();
-            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == id);
+
+            var user = await _dataContext.User.GetById(id);
+
             serviceResponse.Data = _mapper.Map<GetUserDto>(user);
+
             return serviceResponse;
         }
 
@@ -72,8 +79,7 @@ namespace SupportTicketSystem.Services.UserService
 
             try
             {
-                var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == updateUser.Id && u.Id == id);
-
+                var user = await _dataContext.User.GetById(id);
                 user = _mapper.Map<UpdateUserDto, User>(updateUser, user);
 
                 await _dataContext.SaveChangesAsync();
@@ -95,10 +101,9 @@ namespace SupportTicketSystem.Services.UserService
 
             try
             {
-                var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == id);
+                var user = await _dataContext.User.GetById(id);
 
                 user.SecretView = secretview;
-
                 await _dataContext.SaveChangesAsync();
 
                 serviceResponse.Data = _mapper.Map<GetUserDto>(user);
@@ -116,7 +121,7 @@ namespace SupportTicketSystem.Services.UserService
         {
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
             
-            List<Ticket> tickets = await _dataContext.Ticket.Where(t => id == t.CreatedByID).ToListAsync();
+            List<Ticket> tickets = await _dataContext.Ticket.GetByCreatedId(id);
 
             serviceResponse.Data = _mapper.Map<List<GetTicketDto>>(tickets);
 
@@ -127,7 +132,7 @@ namespace SupportTicketSystem.Services.UserService
         {
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
-            List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.Where(t => id == t.UserId).ToListAsync();
+            List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.GetByUserId(id);
 
             serviceResponse.Data = _mapper.Map<List<GetJoinUserTicketDto>>(involvedUsers);
 
