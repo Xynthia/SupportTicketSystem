@@ -5,6 +5,7 @@
         public DateTime Created { get; set; } = DateTime.Now;
         public string Status { get; set; } = string.Empty;
 
-        public int CreatedByID { get; set; } 
+        public int CreatedByID { get; set; }
+        public TicketSeverity Severity { get; set; } = TicketSeverity.Low;
     }
 }

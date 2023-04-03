@@ -5,12 +5,17 @@ using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Services.ConversationService;
 using SupportTicketSystem.Services.JoinUserTicketService;
+using SupportTicketSystem.Services.BackgroundWorkerService;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddHostedService<BackgroundWorkerService>();
+
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -25,8 +30,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IJoinUserTicketService, JoinUserTicketService>();
+builder.Services.AddHostedService<BackgroundWorkerService>();
 
 builder.Services.AddDbContext<DataContext>();
+
 
 var app = builder.Build();
 

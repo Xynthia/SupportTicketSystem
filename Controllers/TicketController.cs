@@ -29,6 +29,12 @@ namespace SupportTicketSystem.Controllers
             return Ok(await _ticketService.GetById(id));
         }
 
+        [HttpGet("leastAmountResponsibleFor")]
+        public async Task<ActionResult<ServiceResponse<GetTicketDto>>> GetleastAmountResponsibleFor()
+        {
+            return Ok(await _ticketService.GetLeastAmountResposibleFor());
+        }
+
         [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetTicketDto>>>> Add(AddTicketDto newTicket)
         {
@@ -73,6 +79,43 @@ namespace SupportTicketSystem.Controllers
             }
             return Ok(serviceResponse);
         }
+
+        [HttpPut("{id}/ResposibleFor")]
+        public async Task<ActionResult<ServiceResponse<GetTicketDto>>> UpdateResposibleFor(int id, int userId)
+        {
+            var serviceResponse = await _ticketService.UpdateResposible(id, userId);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
+        [HttpPut("{id}/SecurityLevelUp")]
+        public async Task<ActionResult<ServiceResponse<GetTicketDto>>> UpdateSeverityLevelUp(int id)
+        {
+            var serviceResponse = await _ticketService.UpdateSeverityLevelUp(id);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
+        [HttpPut("{id}/SecurityLevelDown")]
+        public async Task<ActionResult<ServiceResponse<GetTicketDto>>> UpdateSeverityLevelDown(int id)
+        {
+            var serviceResponse = await _ticketService.UpdateSeverityLevelDown(id);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
+        
+
+
 
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
+using SupportTicketSystem.Dtos.UserDtos;
 using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
 using SupportTicketSystem.Services.TicketService.ExtensionMethods;
 
@@ -29,7 +30,7 @@ namespace SupportTicketSystem.Services.TicketService
             await _dataContext.Ticket.AddAsync(ticket);
             await _dataContext.SaveChangesAsync();
 
-            serviceResponse= await GetAll();
+            serviceResponse = await GetAll();
 
             return serviceResponse;
         }
@@ -132,5 +133,134 @@ namespace SupportTicketSystem.Services.TicketService
 
             return serviceResponse;
         }
+
+        public async Task<ServiceResponse<GetTicketDto>> UpdateSeverityLevelUp(int id)
+        {
+            var serviceResponse = new ServiceResponse<GetTicketDto>();
+
+            try
+            {
+                var ticket = await _dataContext.Ticket.GetById(id);
+
+                int severity = (int)ticket.Severity;
+                if (severity < 5)
+                {
+                    severity = severity + 1;
+                }
+                var ticketSeverity = (TicketSeverity)severity;
+
+                ticket.Severity = ticketSeverity;
+
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
+
+        public async Task<ServiceResponse<GetTicketDto>> UpdateSeverityLevelDown(int id)
+        {
+            var serviceResponse = new ServiceResponse<GetTicketDto>();
+
+            try
+            {
+                var ticket = await _dataContext.Ticket.GetById(id);
+
+                int severity = (int)ticket.Severity;
+                if (severity > 0)
+                {
+                    severity = severity - 1;
+                }
+                var ticketSeverity = (TicketSeverity)severity;
+
+                ticket.Severity = ticketSeverity;
+
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
+
+        public async Task<ServiceResponse<GetTicketDto>> UpdateResposible(int id, int userid)
+        {
+            var serviceResponse = new ServiceResponse<GetTicketDto>();
+
+            try
+            {
+                var ticket = await _dataContext.Ticket.GetById(id);
+
+                ticket.ResponsibleForID = userid;
+
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
+
+        public async Task<ServiceResponse<int>> GetLeastAmountResposibleFor()
+        {
+            var serviceResponse = new ServiceResponse<int>();
+
+            List<User> Users = await _dataContext.User.ToListAsync();
+            List<Ticket> Tickets = await _dataContext.Ticket.ToListAsync();
+            List<List<int>> AmountResponsibleForPerUser = new List<List<int>>();
+            List<int> AmountResponsibleFor = new List<int>();
+
+            int userIdWithLeastAmount = 0;
+            
+            foreach (var user in Users)
+            {
+                int amountResponsibleFor = 0;
+                foreach (var ticket in Tickets)
+                {
+                    if (ticket.ResponsibleForID == user.Id)
+                    {
+                        amountResponsibleFor++;
+                    }
+                }
+                AmountResponsibleFor.Add(amountResponsibleFor);
+
+
+                AmountResponsibleForPerUser.Add(new List<int> { user.Id, amountResponsibleFor });
+            }
+
+            AmountResponsibleFor.Sort();
+            
+            foreach (var amountResponsibleForPerUser in AmountResponsibleForPerUser)
+            {
+                if (amountResponsibleForPerUser.Last() == AmountResponsibleFor.First())
+                {
+                    userIdWithLeastAmount = amountResponsibleForPerUser.First();
+
+                    serviceResponse.Data = userIdWithLeastAmount;
+                    break;
+                }
+                
+            }
+
+            return serviceResponse;
+        }
+        
     }
 }
+

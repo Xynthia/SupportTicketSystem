@@ -12,5 +12,10 @@ namespace SupportTicketSystem.Services.TicketService
         Task<ServiceResponse<List<GetTicketDto>>> Delete(int id);
         Task<ServiceResponse<GetTicketDto>> UpdateStatus(int id, UpdateTicketDto updateTicket);
         Task<ServiceResponse<List<GetJoinUserTicketDto>>> AddUsersInvolved(AddJoinUserTicketDto newJoinUserTicket);
+        Task<ServiceResponse<GetTicketDto>> UpdateSeverityLevelUp(int id);
+        Task<ServiceResponse<GetTicketDto>> UpdateSeverityLevelDown(int id);
+        Task<ServiceResponse<GetTicketDto>> UpdateResposible(int id, int userId);
+        Task<ServiceResponse<int>> GetLeastAmountResposibleFor();
+
     }
 }

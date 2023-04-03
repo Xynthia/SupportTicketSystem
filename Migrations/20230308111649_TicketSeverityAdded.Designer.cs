@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupportTicketSystem.Data;
 
@@ -11,9 +12,11 @@ using SupportTicketSystem.Data;
 namespace SupportTicketSystem.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230308111649_TicketSeverityAdded")]
+    partial class TicketSeverityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,9 +95,6 @@ namespace SupportTicketSystem.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<int?>("ResponsibleForID")
-                        .HasColumnType("int");
-
                     b.Property<int>("Severity")
                         .HasColumnType("int");
 
@@ -105,8 +105,6 @@ namespace SupportTicketSystem.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByID");
-
-                    b.HasIndex("ResponsibleForID");
 
                     b.ToTable("Ticket");
                 });
@@ -180,13 +178,7 @@ namespace SupportTicketSystem.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("SupportTicketSystem.Models.User", "ResponsibleFor")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleForID");
-
                     b.Navigation("CreatedBy");
-
-                    b.Navigation("ResponsibleFor");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.Ticket", b =>

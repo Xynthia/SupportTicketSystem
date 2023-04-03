@@ -8,9 +8,13 @@ namespace SupportTicketSystem.Models
         public int Id { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public string Status { get; set; } = string.Empty;
+        public TicketSeverity Severity { get; set; } = 0;
 
         public int? CreatedByID { get; set; }
         public User CreatedBy { get; set; }
+
+        public int? ResponsibleForID { get; set; }
+        public User ResponsibleFor { get; set; }
 
         public ICollection<JoinUserTicket> InvolvedUsers { get; set; }
 
