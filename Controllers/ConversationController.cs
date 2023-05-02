@@ -44,6 +44,17 @@ namespace SupportTicketSystem.Controllers
             return Ok(serviceResponse);
         }
 
+        [HttpPut("{id}/Log")]
+        public async Task<ActionResult<ServiceResponse<GetConversationDto>>> UpdateLog(int id, string updateLog)
+        {
+            var serviceResponse = await _conversationService.UpdateLog(id, updateLog);
+            if (serviceResponse.Data == null)
+            {
+                return NotFound(serviceResponse);
+            }
+            return Ok(serviceResponse);
+        }
+
         [HttpDelete]
         public async Task<ActionResult<ServiceResponse<GetConversationDto>>> Delete(int id)
         {

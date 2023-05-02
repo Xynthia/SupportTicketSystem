@@ -9,5 +9,7 @@ namespace SupportTicketSystem.Services.ConversationService
         Task<ServiceResponse<List<GetConversationDto>>> Add(AddConversationDto newConversation);
         Task<ServiceResponse<GetConversationDto>> Update(int id, UpdateConversationDto updateConversation);
         Task<ServiceResponse<List<GetConversationDto>>> Delete(int id);
+
+        Task<ServiceResponse<GetConversationDto>> UpdateLog(int id, string updateLog);
     }
 }

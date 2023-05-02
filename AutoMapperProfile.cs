@@ -25,6 +25,7 @@ namespace SupportTicketSystem
             CreateMap<JoinUserTicket, GetJoinUserTicketDto>();
             CreateMap<AddJoinUserTicketDto, JoinUserTicket>();
             CreateMap<UpdateJoinUserTicketDto, JoinUserTicket>();
+
         }
     }
 }

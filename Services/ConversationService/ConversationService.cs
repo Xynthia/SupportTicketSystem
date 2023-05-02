@@ -23,8 +23,30 @@ namespace SupportTicketSystem.Services.ConversationService
 
             var conversation = _mapper.Map<Conversation>(newConversation);
 
-            await _dataContext.AddAsync(conversation);
-            await _dataContext.SaveChangesAsync();
+            int startIndex = 0;
+            int endIndex = 0;
+
+            // finding id from to user email
+            startIndex = conversation.Log.IndexOf("To") + 6;
+            endIndex = conversation.Log.IndexOf(".tickets");
+            int ticketId = Int32.Parse(conversation.Log.Substring(startIndex, endIndex - startIndex));
+            var ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == ticketId);
+            conversation.TicketId = ticket.Id;
+            conversation.ToUserId = ticket.ResponsibleForID;
+
+            //finding email fromUser
+            startIndex = conversation.Log.IndexOf("From") + 8;
+            endIndex = conversation.Log.IndexOf("To") - 6;
+            string fromUserEmail = conversation.Log.Substring(startIndex, endIndex - startIndex);
+            var user = await _dataContext.User.FirstOrDefaultAsync(x => x.Email == fromUserEmail);
+            conversation.FromUserId = user.Id;
+
+
+            if (user != null && ticket != null)
+            {
+                await _dataContext.Conversation.AddAsync(conversation);
+                await _dataContext.SaveChangesAsync();
+            }
 
             serviceResponse = await GetAll();
 
@@ -91,6 +113,35 @@ namespace SupportTicketSystem.Services.ConversationService
 
             return serviceResponse;
         }
+
+        public async Task<ServiceResponse<GetConversationDto>> UpdateLog(int id, string updateLog)
+        {
+            var serviceResponse = new ServiceResponse<GetConversationDto>();
+
+            int startIndex = 0;
+            int endIndex = 0;
+
+            try
+            {
+                var conversation = await _dataContext.Conversation.GetById(id);
+
+                startIndex = conversation.Log.IndexOf("StrippedTextReply") + 23;
+
+                conversation.Log = conversation.Log.Insert(startIndex, updateLog + "___ reply before this line ___ ");
+
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
+
     }
 }
 
