@@ -4,6 +4,7 @@ using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
+using SupportTicketSystem.Services.ConversationService;
 using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
 using SupportTicketSystem.Services.TicketService.ExtensionMethods;
 
@@ -48,6 +49,11 @@ namespace SupportTicketSystem.Services.TicketService
 
                 _dataContext.Ticket.Remove(ticket);
                 await _dataContext.SaveChangesAsync();
+
+                // send mail to user of ticket 
+                IConversationService conversationService = null;
+                var message = $"\n Hello, \n Your ticket has been deleted. This was the ticket number {ticket.Id}. \n Greetings, {ticket.ResponsibleFor.Name}";
+                conversationService.UpdateLog(id, message);
 
                 serviceResponse = await GetAll();
             }
@@ -119,6 +125,11 @@ namespace SupportTicketSystem.Services.TicketService
 
                 await _dataContext.SaveChangesAsync();
 
+                // send mail to user of ticket 
+                IConversationService conversationService = null;
+                var message = $"\n Hello, \n Your tickets status has changed to {ticket.Status}. \n Greetings, {ticket.ResponsibleFor.Name}";
+                conversationService.UpdateLog(id, message);
+
                 serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
             }
             catch (Exception ex)
@@ -140,6 +151,11 @@ namespace SupportTicketSystem.Services.TicketService
 
             await _dataContext.AddAsync(joinUserTicket);
             await _dataContext.SaveChangesAsync();
+
+            // send mail to user of ticket
+            IConversationService conversationService = null;
+            var message = $"\n Hello, \n Your ticket has more Users involved in the ticket. this user has been added {joinUserTicket.InvolvedUser.Name}. \n Greetings, {joinUserTicket.Ticket.ResponsibleFor.Name}";
+            conversationService.UpdateLog(joinUserTicket.TicketId, message);
 
             serviceResponse.Data = await _dataContext.JoinUserTicket.GetJoinTicketDtoFromQuery(_mapper);
 
