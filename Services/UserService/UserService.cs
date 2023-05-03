@@ -23,6 +23,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetUserDto>>> Add(AddUserDto newUser)
         {
+            // add user and save
             var serviceResponse = new ServiceResponse<List<GetUserDto>>();
             
             User user = _mapper.Map<User>(newUser);
@@ -35,6 +36,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetUserDto>>> Delete(int id)
         {
+            // delete user by id
             var serviceRepsonse = new ServiceResponse<List<GetUserDto>>();
             try
             {
@@ -55,6 +57,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetUserDto>>> GetAll()
         {
+            //get all users
             var serviceRespone = new ServiceResponse<List<GetUserDto>>();
 
             serviceRespone.Data = await _dataContext.User.GetUserDtoFromQuery(_mapper);
@@ -64,6 +67,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> GetById(int id)
         {
+            //get user by id
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             var user = await _dataContext.User.GetById(id);
@@ -75,6 +79,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> Update(int id, UpdateUserDto updateUser)
         {
+            //update user by id.
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             try
@@ -97,6 +102,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> UpdateSecretView(int id, bool secretview)
         {
+            // update secret view status
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             try
@@ -119,6 +125,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetTicketDto>>> GetAllCreatedTickets(int id)
         {
+            // get tickets created by user.
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
             
             List<Ticket> tickets = await _dataContext.Ticket.GetByCreatedId(id);
@@ -130,6 +137,7 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetJoinUserTicketDto>>> GetAllInvolvedTickets(int id)
         {
+            // get tickets that the user is involved with.
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
             List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.GetByUserId(id);

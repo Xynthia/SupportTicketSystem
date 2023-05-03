@@ -19,6 +19,7 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<List<GetConversationDto>>> Add(AddConversationDto newConversation)
         {
+            //add conversation and save
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
             var conversation = _mapper.Map<Conversation>(newConversation);
@@ -26,7 +27,7 @@ namespace SupportTicketSystem.Services.ConversationService
             int startIndex = 0;
             int endIndex = 0;
 
-            // finding id from to user email
+            // finding id from toUser && ticket
             startIndex = conversation.Log.IndexOf("To") + 6;
             endIndex = conversation.Log.IndexOf(".tickets");
             int ticketId = Int32.Parse(conversation.Log.Substring(startIndex, endIndex - startIndex));
@@ -34,14 +35,14 @@ namespace SupportTicketSystem.Services.ConversationService
             conversation.TicketId = ticket.Id;
             conversation.ToUserId = ticket.ResponsibleForID;
 
-            //finding email fromUser
+            //finding id from fromUser
             startIndex = conversation.Log.IndexOf("From") + 8;
             endIndex = conversation.Log.IndexOf("To") - 6;
             string fromUserEmail = conversation.Log.Substring(startIndex, endIndex - startIndex);
             var user = await _dataContext.User.FirstOrDefaultAsync(x => x.Email == fromUserEmail);
             conversation.FromUserId = user.Id;
 
-
+            // if ticket and user excist then add conversation.
             if (user != null && ticket != null)
             {
                 await _dataContext.Conversation.AddAsync(conversation);
@@ -56,6 +57,8 @@ namespace SupportTicketSystem.Services.ConversationService
         public async Task<ServiceResponse<List<GetConversationDto>>> Delete(int id)
         {
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
+
+            //remove conversation by id
             try
             {
                 var converstation = await _dataContext.Conversation.GetById(id);
@@ -67,6 +70,7 @@ namespace SupportTicketSystem.Services.ConversationService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -75,6 +79,7 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<List<GetConversationDto>>> GetAll()
         {
+            // get all conversations
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
             serviceResponse.Data = await _dataContext.Conversation.GetConversationDtoFromQuery(_mapper);
@@ -84,6 +89,7 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<GetConversationDto>> GetById(int id)
         {
+            // get conversation by id
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
             var converstation = await _dataContext.Conversation.GetById(id);
@@ -96,6 +102,7 @@ namespace SupportTicketSystem.Services.ConversationService
         {
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
+            //update conversation by id.
             try
             {
                 var converstation = await _dataContext.Conversation.GetById(id);
@@ -107,6 +114,7 @@ namespace SupportTicketSystem.Services.ConversationService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -121,6 +129,7 @@ namespace SupportTicketSystem.Services.ConversationService
             int startIndex = 0;
             int endIndex = 0;
 
+            //update log of conversation
             try
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
@@ -135,6 +144,7 @@ namespace SupportTicketSystem.Services.ConversationService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }

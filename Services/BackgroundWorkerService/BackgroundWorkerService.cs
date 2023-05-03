@@ -18,6 +18,7 @@ namespace SupportTicketSystem.Services.BackgroundWorkerService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                //update severity level up after 20 sec and assign the ticket to a user when the ticket reaches severity "high".
                 try
                 {
                     _logger.LogInformation("Time:{time}", DateTimeOffset.Now);

@@ -25,6 +25,8 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
 
+            //add new ticket and save it
+
             Ticket ticket = _mapper.Map<Ticket>(newTicket);
 
             await _dataContext.Ticket.AddAsync(ticket);
@@ -38,6 +40,8 @@ namespace SupportTicketSystem.Services.TicketService
         public async Task<ServiceResponse<List<GetTicketDto>>> Delete(int id)
         {
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
+
+            //delete ticket by id.
             try
             {
                 var ticket = await _dataContext.Ticket.FirstAsync(t => t.Id == id);
@@ -58,6 +62,7 @@ namespace SupportTicketSystem.Services.TicketService
 
         public async Task<ServiceResponse<List<GetTicketDto>>> GetAll()
         {
+            //get all tickets
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
 
             serviceResponse.Data = await _dataContext.Ticket.GetTicketDtoFromQuery(_mapper);
@@ -67,6 +72,8 @@ namespace SupportTicketSystem.Services.TicketService
 
         public async Task<ServiceResponse<GetTicketDto>> GetById(int id)
         {
+            //get ticket by id
+
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
             var ticket = await _dataContext.Ticket.GetById(id);
@@ -79,6 +86,7 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
+            //update ticket by id.
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
@@ -90,6 +98,7 @@ namespace SupportTicketSystem.Services.TicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -101,6 +110,7 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
+            //update ticket status
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
@@ -113,6 +123,7 @@ namespace SupportTicketSystem.Services.TicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -122,6 +133,7 @@ namespace SupportTicketSystem.Services.TicketService
 
         public async Task<ServiceResponse<List<GetJoinUserTicketDto>>> AddUsersInvolved(AddJoinUserTicketDto newJoinUserTicket)
         {
+            // add users involved to the tickeet
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
             var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
@@ -138,6 +150,7 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
+            //update the severity level of a ticket 1 level up.
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
@@ -157,6 +170,7 @@ namespace SupportTicketSystem.Services.TicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -168,6 +182,7 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
+            //update the severity level of a ticket 1 level down.
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
@@ -187,6 +202,7 @@ namespace SupportTicketSystem.Services.TicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -198,6 +214,7 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
+            //update ticket resposible user
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
@@ -210,6 +227,7 @@ namespace SupportTicketSystem.Services.TicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -219,6 +237,7 @@ namespace SupportTicketSystem.Services.TicketService
 
         public async Task<ServiceResponse<int>> GetLeastAmountResposibleFor()
         {
+            // get the user who is the least responsible for tickets.
             var serviceResponse = new ServiceResponse<int>();
 
             List<User> Users = await _dataContext.User.ToListAsync();
@@ -228,6 +247,7 @@ namespace SupportTicketSystem.Services.TicketService
 
             int userIdWithLeastAmount = 0;
             
+            // looking how many tickets the users are responsible for
             foreach (var user in Users)
             {
                 int amountResponsibleFor = 0;
@@ -245,7 +265,8 @@ namespace SupportTicketSystem.Services.TicketService
             }
 
             AmountResponsibleFor.Sort();
-            
+
+            // getting the user id which has the least amount of tickets responsible for
             foreach (var amountResponsibleForPerUser in AmountResponsibleForPerUser)
             {
                 if (amountResponsibleForPerUser.Last() == AmountResponsibleFor.First())
