@@ -134,7 +134,7 @@ namespace SupportTicketSystem.Services.ConversationService
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
                 startIndex = conversation.Log.IndexOf("StrippedTextReply") + 23;
-                conversation.Log = conversation.Log.Insert(startIndex, updateLog + "___ reply before this line ___ ");
+                conversation.Log = conversation.Log.Insert(startIndex, updateLog + "\n ___ reply before this line ___ \n]");
 
                 await _dataContext.SaveChangesAsync();
 

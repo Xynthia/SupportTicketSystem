@@ -15,11 +15,13 @@ namespace SupportTicketSystem.Services.TicketService
 
         public DataContext _dataContext { get; }
         public IMapper _mapper { get; }
+        public IConversationService _conversationService { get; }
 
-        public TicketService(DataContext dataContext, IMapper mapper)
+        public TicketService(DataContext dataContext, IMapper mapper, IConversationService conversationService)
         {
             _dataContext = dataContext;
             _mapper = mapper;
+            _conversationService = conversationService;
         }
 
         public async Task<ServiceResponse<List<GetTicketDto>>> Add(AddTicketDto newTicket)
@@ -42,18 +44,18 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
 
-            //delete ticket by id.
             try
             {
                 var ticket = await _dataContext.Ticket.FirstAsync(t => t.Id == id);
 
+                // send mail to user of ticket 
+                var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == ticket.Id);
+                var message = $"\n Hello, \n Your ticket has been deleted. This was the ticket number {ticket.Id}. \n Greetings, {ticket.ResponsibleFor?.Name} \n Secret View";
+                await _conversationService.UpdateLog(conversation.Id, message);
+
+                //delete ticket by id.
                 _dataContext.Ticket.Remove(ticket);
                 await _dataContext.SaveChangesAsync();
-
-                // send mail to user of ticket 
-                IConversationService conversationService = null;
-                var message = $"\n Hello, \n Your ticket has been deleted. This was the ticket number {ticket.Id}. \n Greetings, {ticket.ResponsibleFor.Name}";
-                conversationService.UpdateLog(id, message);
 
                 serviceResponse = await GetAll();
             }
@@ -116,19 +118,23 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
-            //update ticket status
+            
             try
             {
+                //update ticket status
                 var ticket = await _dataContext.Ticket.GetById(id);
 
                 ticket.Status = updateTicket.Status;
-
-                await _dataContext.SaveChangesAsync();
+                ticket.ResponsibleFor = await _dataContext.User.FirstOrDefaultAsync(x => x.Id == ticket.ResponsibleForID);
 
                 // send mail to user of ticket 
-                IConversationService conversationService = null;
-                var message = $"\n Hello, \n Your tickets status has changed to {ticket.Status}. \n Greetings, {ticket.ResponsibleFor.Name}";
-                conversationService.UpdateLog(id, message);
+                var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == ticket.Id);
+                var message = $"\n Hello, \n Your tickets status has changed to {ticket.Status}. \n Greetings, {ticket.ResponsibleFor?.Name} \n Secret View"; 
+
+                await _conversationService.UpdateLog(conversation.Id, message);
+
+                //save changes
+                await _dataContext.SaveChangesAsync();
 
                 serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
             }
@@ -147,17 +153,30 @@ namespace SupportTicketSystem.Services.TicketService
             // add users involved to the tickeet
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
-            var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
+            try
+            {
+                var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
 
-            await _dataContext.AddAsync(joinUserTicket);
-            await _dataContext.SaveChangesAsync();
+                joinUserTicket.InvolvedUser = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == joinUserTicket.UserId);
+                joinUserTicket.Ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == joinUserTicket.TicketId);
+                await _dataContext.AddAsync(joinUserTicket);
+                
+                // send mail to user of ticket
+                var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == joinUserTicket.Ticket.Id);
+                var message = $"\n Hello, \n Your ticket has more Users involved in the ticket. this user has been added {joinUserTicket.InvolvedUser.Name}. \n Greetings, {joinUserTicket.Ticket.ResponsibleFor?.Name} \n Secret View";
 
-            // send mail to user of ticket
-            IConversationService conversationService = null;
-            var message = $"\n Hello, \n Your ticket has more Users involved in the ticket. this user has been added {joinUserTicket.InvolvedUser.Name}. \n Greetings, {joinUserTicket.Ticket.ResponsibleFor.Name}";
-            conversationService.UpdateLog(joinUserTicket.TicketId, message);
+                await _conversationService.UpdateLog(conversation.Id, message);
 
-            serviceResponse.Data = await _dataContext.JoinUserTicket.GetJoinTicketDtoFromQuery(_mapper);
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = await _dataContext.JoinUserTicket.GetJoinTicketDtoFromQuery(_mapper);
+            }
+            catch (Exception ex)
+            {
+                //send message when it goes wrong.
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
 
             return serviceResponse;
         }
