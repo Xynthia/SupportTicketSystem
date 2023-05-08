@@ -12,5 +12,7 @@ namespace SupportTicketSystem.Models
 
         public int TicketId { get; set; }
         public Ticket Ticket { get; set; }
+
+        public DateTime? Archived { get; set; } = null;
     }
 }

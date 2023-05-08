@@ -54,7 +54,8 @@ namespace SupportTicketSystem.Services.TicketService
                 await _conversationService.UpdateLog(conversation.Id, message);
 
                 //delete ticket by id.
-                _dataContext.Ticket.Remove(ticket);
+                ticket.Archived = DateTime.Now;
+
                 await _dataContext.SaveChangesAsync();
 
                 serviceResponse = await GetAll();

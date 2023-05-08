@@ -62,8 +62,9 @@ namespace SupportTicketSystem.Services.ConversationService
             try
             {
                 var converstation = await _dataContext.Conversation.GetById(id);
-                
-                _dataContext.Remove(converstation);
+
+                converstation.Archived = DateTime.Now;
+
                 await _dataContext.SaveChangesAsync();
 
                 serviceResponse = await GetAll();

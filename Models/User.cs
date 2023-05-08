@@ -10,8 +10,11 @@ namespace SupportTicketSystem.Models
         public string Email { get; set; } = string.Empty;
         public bool SecretView { get; set; } = false;
 
+        public DateTime? Archived { get; set; } = null;
+
         public ICollection<Ticket> CreatedTickets { get; set; }
         public ICollection<JoinUserTicket> JoinUserTicket { get; set; }
         public ICollection<Conversation> Conversations { get; set; }
+
     }
 }

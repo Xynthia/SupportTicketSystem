@@ -42,7 +42,8 @@ namespace SupportTicketSystem.Services.UserService
             {
                 var user = await _dataContext.User.FirstAsync(u => u.Id == id);
 
-                _dataContext.User.Remove(user);
+                user.Archived = DateTime.Now;
+
                 await _dataContext.SaveChangesAsync();
 
                 serviceRepsonse = await GetAll();

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SupportTicketSystem.Data;
 
@@ -11,9 +12,11 @@ using SupportTicketSystem.Data;
 namespace SupportTicketSystem.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230508100620_AddedArchive")]
+    partial class AddedArchive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,7 +58,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("ToUserId");
 
-                    b.ToTable("Conversation", (string)null);
+                    b.ToTable("Conversation");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.JoinUserTicket", b =>
@@ -82,7 +85,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinUserTicket", (string)null);
+                    b.ToTable("JoinUserTicket");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.Ticket", b =>
@@ -119,7 +122,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("ResponsibleForID");
 
-                    b.ToTable("Ticket", (string)null);
+                    b.ToTable("Ticket");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.User", b =>
@@ -146,7 +149,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.Conversation", b =>

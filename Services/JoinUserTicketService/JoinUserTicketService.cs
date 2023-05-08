@@ -37,7 +37,8 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             {
                 var joinUserTicket = await _dataContext.JoinUserTicket.FirstOrDefaultAsync(j => j.Id == id);
 
-                _dataContext.Remove(joinUserTicket);
+                joinUserTicket.Archived = DateTime.Now;
+
                 await _dataContext.SaveChangesAsync();
 
                 serviceResponse = await GetAll();

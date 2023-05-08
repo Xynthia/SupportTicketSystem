@@ -9,12 +9,14 @@ namespace SupportTicketSystem.Models
         public string Log { get; set; } = string.Empty;
 
         public int? FromUserId { get; set; }
-        public User? FromUser { get; set; }
+        public User FromUser { get; set; }
 
         public int? ToUserId { get; set; }
-        public User? ToUser { get; set; }
+        public User ToUser { get; set; }
 
         public int? TicketId { get; set; }
-        public Ticket? Ticket { get; set; }
+        public Ticket Ticket { get; set; }
+
+        public DateTime? Archived { get; set; } = null;
     }
 }

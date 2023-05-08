@@ -16,6 +16,11 @@ namespace SupportTicketSystem.Data
 
         protected override void OnModelCreating(ModelBuilder modelbuilder)
         {
+            modelbuilder.Entity<User>().HasQueryFilter(x => x.Archived == null);
+            modelbuilder.Entity<Ticket>().HasQueryFilter(x => x.Archived == null);
+            modelbuilder.Entity<JoinUserTicket>().HasQueryFilter(x => x.Archived == null);
+            modelbuilder.Entity<Conversation>().HasQueryFilter(x => x.Archived == null);
+
             modelbuilder.Entity<Ticket>()
                 .HasOne(t => t.CreatedBy)
                 .WithMany(t => t.CreatedTickets)
