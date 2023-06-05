@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
+using SupportTicketSystem.Services.GuardService;
 using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
 
 namespace SupportTicketSystem.Services.JoinUserTicketService
@@ -22,6 +23,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
             var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
+            Guard.Against.Null(joinUserTicket);
 
             await _dataContext.AddAsync(joinUserTicket);
             await _dataContext.SaveChangesAsync();
@@ -36,6 +38,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             try
             {
                 var joinUserTicket = await _dataContext.JoinUserTicket.FirstOrDefaultAsync(j => j.Id == id);
+                Guard.Against.Null(joinUserTicket);
 
                 joinUserTicket.Archived = DateTime.Now;
 
@@ -56,7 +59,10 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
         {
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
-            serviceResponse.Data = await _dataContext.JoinUserTicket.GetJoinTicketDtoFromQuery(_mapper);
+            var JoinUserTickets = await _dataContext.JoinUserTicket.GetJoinTicketDtoFromQuery(_mapper);
+            Guard.Against.Null(JoinUserTickets);
+
+            serviceResponse.Data = JoinUserTickets;
 
             return serviceResponse;
         }
@@ -66,6 +72,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             var serviceResponse = new ServiceResponse<GetJoinUserTicketDto>();
 
             var joinUserTicket = await _dataContext.JoinUserTicket.GetById(id);
+            Guard.Against.Null(joinUserTicket);
             serviceResponse.Data = _mapper.Map<GetJoinUserTicketDto>(joinUserTicket);
 
             return serviceResponse;
@@ -78,6 +85,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             try
             {
                 var joinUserTicket = await _dataContext.JoinUserTicket.GetById(id);
+                Guard.Against.Null(joinUserTicket);
                 joinUserTicket = _mapper.Map<UpdateJoinUserTicketDto, JoinUserTicket>(updateJoinUserTicket, joinUserTicket);
 
                 await _dataContext.SaveChangesAsync();

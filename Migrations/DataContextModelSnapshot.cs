@@ -55,7 +55,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("ToUserId");
 
-                    b.ToTable("Conversation", (string)null);
+                    b.ToTable("Conversation");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.JoinUserTicket", b =>
@@ -82,7 +82,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinUserTicket", (string)null);
+                    b.ToTable("JoinUserTicket");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.Ticket", b =>
@@ -119,7 +119,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasIndex("ResponsibleForID");
 
-                    b.ToTable("Ticket", (string)null);
+                    b.ToTable("Ticket");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.User", b =>
@@ -146,7 +146,7 @@ namespace SupportTicketSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("SupportTicketSystem.Models.Conversation", b =>

@@ -12,8 +12,8 @@ using SupportTicketSystem.Data;
 namespace SupportTicketSystem.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230405114947_ConversationEmailRemoved")]
-    partial class ConversationEmailRemoved
+    [Migration("20230605103601_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace SupportTicketSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("Archived")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("FromUserId")
                         .HasColumnType("int");
 
@@ -40,7 +43,8 @@ namespace SupportTicketSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TicketId")
+                    b.Property<int?>("TicketId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int?>("ToUserId")
@@ -65,6 +69,9 @@ namespace SupportTicketSystem.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("Archived")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("TicketId")
                         .HasColumnType("int");
 
@@ -88,6 +95,9 @@ namespace SupportTicketSystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Archived")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -122,6 +132,9 @@ namespace SupportTicketSystem.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Archived")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()

@@ -4,6 +4,7 @@ using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
+using SupportTicketSystem.Services.GuardService;
 using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
 using SupportTicketSystem.Services.TicketService.ExtensionMethods;
 using SupportTicketSystem.Services.UserService.ExtensionMethods;
@@ -26,7 +27,8 @@ namespace SupportTicketSystem.Services.UserService
             // add user and save
             var serviceResponse = new ServiceResponse<List<GetUserDto>>();
             
-            User user = _mapper.Map<User>(newUser);
+            var user = _mapper.Map<User>(newUser);
+            Guard.Against.Null(user);
 
             await _dataContext.User.AddAsync(user);
             await _dataContext.SaveChangesAsync();
@@ -41,6 +43,7 @@ namespace SupportTicketSystem.Services.UserService
             try
             {
                 var user = await _dataContext.User.FirstAsync(u => u.Id == id);
+                Guard.Against.Null(user);
 
                 user.Archived = DateTime.Now;
 
@@ -61,7 +64,10 @@ namespace SupportTicketSystem.Services.UserService
             //get all users
             var serviceRespone = new ServiceResponse<List<GetUserDto>>();
 
-            serviceRespone.Data = await _dataContext.User.GetUserDtoFromQuery(_mapper);
+            var Users = await _dataContext.User.GetUserDtoFromQuery(_mapper);
+            Guard.Against.Null(Users);
+
+            serviceRespone.Data = Users;
 
             return serviceRespone;
         }
@@ -72,6 +78,7 @@ namespace SupportTicketSystem.Services.UserService
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             var user = await _dataContext.User.GetById(id);
+            Guard.Against.Null(user);
 
             serviceResponse.Data = _mapper.Map<GetUserDto>(user);
 
@@ -86,6 +93,7 @@ namespace SupportTicketSystem.Services.UserService
             try
             {
                 var user = await _dataContext.User.GetById(id);
+                Guard.Against.Null(user);
                 user = _mapper.Map<UpdateUserDto, User>(updateUser, user);
 
                 await _dataContext.SaveChangesAsync();
@@ -109,6 +117,7 @@ namespace SupportTicketSystem.Services.UserService
             try
             {
                 var user = await _dataContext.User.GetById(id);
+                Guard.Against.Null(user);
 
                 user.SecretView = secretview;
                 await _dataContext.SaveChangesAsync();
@@ -130,6 +139,7 @@ namespace SupportTicketSystem.Services.UserService
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
             
             List<Ticket> tickets = await _dataContext.Ticket.GetByCreatedId(id);
+            Guard.Against.Null(tickets);
 
             serviceResponse.Data = _mapper.Map<List<GetTicketDto>>(tickets);
 
@@ -142,6 +152,7 @@ namespace SupportTicketSystem.Services.UserService
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
             List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.GetByUserId(id);
+            Guard.Against.Null(involvedUsers);
 
             serviceResponse.Data = _mapper.Map<List<GetJoinUserTicketDto>>(involvedUsers);
 

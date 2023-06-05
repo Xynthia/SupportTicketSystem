@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.Conversation;
 using SupportTicketSystem.Services.ConversationService.ExtensionMethods;
+using SupportTicketSystem.Services.GuardService;
+using System.Text.Json;
+using System.Web;
 
 namespace SupportTicketSystem.Services.ConversationService
 {
@@ -19,31 +22,27 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<List<GetConversationDto>>> Add(AddConversationDto newConversation)
         {
-            //add conversation and save
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
             var conversation = _mapper.Map<Conversation>(newConversation);
 
-            int startIndex = 0;
-            int endIndex = 0;
+            var postmarkLog = JsonSerializer.Deserialize<PostmarkLogModel>(conversation.Log);
 
-            // finding id from toUser && ticket
-            startIndex = conversation.Log.IndexOf("To") + 6;
-            endIndex = conversation.Log.IndexOf(".tickets");
-            int ticketId = Int32.Parse(conversation.Log.Substring(startIndex, endIndex - startIndex));
+            var ticketIdSubstring = postmarkLog.To.Substring(0, postmarkLog.To.IndexOf(".tickets"));
+            int ticketId = Int32.Parse(ticketIdSubstring);
             var ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == ticketId);
+            Guard.Against.Null(ticket);
+
+            var FromUserEmail = postmarkLog.From;
+            var fromUser = await _dataContext.User.FirstOrDefaultAsync(x => x.Email == FromUserEmail);
+            Guard.Against.Null(fromUser);
+
+            conversation.FromUserId = fromUser.Id;
             conversation.TicketId = ticket.Id;
             conversation.ToUserId = ticket.ResponsibleForID;
 
-            //finding id from fromUser
-            startIndex = conversation.Log.IndexOf("From") + 8;
-            endIndex = conversation.Log.IndexOf("To") - 6;
-            string fromUserEmail = conversation.Log.Substring(startIndex, endIndex - startIndex);
-            var user = await _dataContext.User.FirstOrDefaultAsync(x => x.Email == fromUserEmail);
-            conversation.FromUserId = user.Id;
-
             // if ticket and user excist then add conversation.
-            if (user != null && ticket != null)
+            if (fromUser != null && ticket != null)
             {
                 await _dataContext.Conversation.AddAsync(conversation);
                 await _dataContext.SaveChangesAsync();
@@ -61,9 +60,11 @@ namespace SupportTicketSystem.Services.ConversationService
             //remove conversation by id
             try
             {
-                var converstation = await _dataContext.Conversation.GetById(id);
+                var conversation = await _dataContext.Conversation.GetById(id);
+                Guard.Against.Null(conversation);
 
-                converstation.Archived = DateTime.Now;
+                //converstion is being archieved. we can see the time and date. if it is archieved or not.
+                conversation.Archived = DateTime.Now;
 
                 await _dataContext.SaveChangesAsync();
 
@@ -83,7 +84,10 @@ namespace SupportTicketSystem.Services.ConversationService
             // get all conversations
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
-            serviceResponse.Data = await _dataContext.Conversation.GetConversationDtoFromQuery(_mapper);
+            var conversations = await _dataContext.Conversation.GetConversationDtoFromQuery(_mapper);
+            Guard.Against.Null(conversations);
+
+            serviceResponse.Data = conversations;
 
             return serviceResponse;
         }
@@ -93,8 +97,9 @@ namespace SupportTicketSystem.Services.ConversationService
             // get conversation by id
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
-            var converstation = await _dataContext.Conversation.GetById(id);
-            serviceResponse.Data = _mapper.Map<GetConversationDto>(converstation);
+            var conversation = await _dataContext.Conversation.GetById(id);
+            Guard.Against.Null(conversation);
+            serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
 
             return serviceResponse;
         }
@@ -106,36 +111,9 @@ namespace SupportTicketSystem.Services.ConversationService
             //update conversation by id.
             try
             {
-                var converstation = await _dataContext.Conversation.GetById(id);
-                converstation = _mapper.Map<UpdateConversationDto, Conversation>(updateConversation, converstation);
-
-                await _dataContext.SaveChangesAsync();
-
-                serviceResponse.Data = _mapper.Map<GetConversationDto>(converstation);
-            }
-            catch (Exception ex)
-            {
-                //send message when it goes wrong.
-                serviceResponse.Succes = false;
-                serviceResponse.Message = ex.Message;
-            }
-
-            return serviceResponse;
-        }
-
-        public async Task<ServiceResponse<GetConversationDto>> UpdateLog(int id, string updateLog)
-        {
-            var serviceResponse = new ServiceResponse<GetConversationDto>();
-
-            int startIndex = 0;
-            int endIndex = 0;
-
-            //update log of conversation
-            try
-            {
                 var conversation = await _dataContext.Conversation.GetById(id);
-                startIndex = conversation.Log.IndexOf("StrippedTextReply") + 23;
-                conversation.Log = conversation.Log.Insert(startIndex, updateLog + "\n ___ reply before this line ___ \n]");
+                Guard.Against.Null(conversation);
+                conversation = _mapper.Map<UpdateConversationDto, Conversation>(updateConversation, conversation);
 
                 await _dataContext.SaveChangesAsync();
 
@@ -151,6 +129,35 @@ namespace SupportTicketSystem.Services.ConversationService
             return serviceResponse;
         }
 
+        public async Task<ServiceResponse<GetConversationDto>> UpdateLog(int id, string updateLog)
+        {
+            var serviceResponse = new ServiceResponse<GetConversationDto>();
+
+            //update log of conversation
+            try
+            {
+                var conversation = await _dataContext.Conversation.GetById(id);
+                Guard.Against.Null(conversation);
+
+                var postmarkLog = JsonSerializer.Deserialize<PostmarkLogModel>(conversation.Log);
+
+                postmarkLog.StrippedTextReply = postmarkLog.StrippedTextReply.Insert(0, "\n" + updateLog + "\n ___ reply before this line ___ \n");
+
+                conversation.Log = JsonSerializer.Serialize<PostmarkLogModel>(postmarkLog);
+
+                await _dataContext.SaveChangesAsync();
+
+                serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
+            }
+            catch (Exception ex)
+            {
+                //send message when it goes wrong.
+                serviceResponse.Succes = false;
+                serviceResponse.Message = ex.Message;
+            }
+
+            return serviceResponse;
+        }
     }
 }
 

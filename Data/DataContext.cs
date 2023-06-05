@@ -14,6 +14,7 @@ namespace SupportTicketSystem.Data
         public DbSet<JoinUserTicket> JoinUserTicket => Set<JoinUserTicket>();
         public DbSet<Conversation> Conversation => Set<Conversation>();
 
+
         protected override void OnModelCreating(ModelBuilder modelbuilder)
         {
             modelbuilder.Entity<User>().HasQueryFilter(x => x.Archived == null);

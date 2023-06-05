@@ -5,6 +5,7 @@ using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
 using SupportTicketSystem.Dtos.UserDtos;
 using SupportTicketSystem.Services.ConversationService;
+using SupportTicketSystem.Services.GuardService;
 using SupportTicketSystem.Services.JoinUserTicketService.ExtensionMethods;
 using SupportTicketSystem.Services.TicketService.ExtensionMethods;
 
@@ -30,7 +31,8 @@ namespace SupportTicketSystem.Services.TicketService
 
             //add new ticket and save it
 
-            Ticket ticket = _mapper.Map<Ticket>(newTicket);
+            var ticket = _mapper.Map<Ticket>(newTicket);
+            Guard.Against.Null(ticket);
 
             await _dataContext.Ticket.AddAsync(ticket);
             await _dataContext.SaveChangesAsync();
@@ -47,9 +49,11 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var ticket = await _dataContext.Ticket.FirstAsync(t => t.Id == id);
+                Guard.Against.Null(ticket);
 
                 // send mail to user of ticket 
                 var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == ticket.Id);
+                Guard.Against.Null(conversation);
                 var message = $"\n Hello, \n Your ticket has been deleted. This was the ticket number {ticket.Id}. \n Greetings, {ticket.ResponsibleFor?.Name} \n Secret View";
                 await _conversationService.UpdateLog(conversation.Id, message);
 
@@ -74,7 +78,10 @@ namespace SupportTicketSystem.Services.TicketService
             //get all tickets
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
 
-            serviceResponse.Data = await _dataContext.Ticket.GetTicketDtoFromQuery(_mapper);
+            var tickets = await _dataContext.Ticket.GetTicketDtoFromQuery(_mapper);
+            Guard.Against.Null(tickets);
+
+            serviceResponse.Data = tickets;
 
             return serviceResponse;
         }
@@ -86,6 +93,7 @@ namespace SupportTicketSystem.Services.TicketService
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
             var ticket = await _dataContext.Ticket.GetById(id);
+            Guard.Against.Null(ticket);
             serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
 
             return serviceResponse;
@@ -99,6 +107,7 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
+                Guard.Against.Null(ticket);
                 ticket = _mapper.Map<UpdateTicketDto, Ticket>(updateTicket, ticket);
 
                 await _dataContext.SaveChangesAsync();
@@ -119,19 +128,20 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<GetTicketDto>();
 
-            
             try
             {
                 //update ticket status
                 var ticket = await _dataContext.Ticket.GetById(id);
+                Guard.Against.Null(ticket);
 
                 ticket.Status = updateTicket.Status;
                 ticket.ResponsibleFor = await _dataContext.User.FirstOrDefaultAsync(x => x.Id == ticket.ResponsibleForID);
 
                 // send mail to user of ticket 
                 var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == ticket.Id);
-                var message = $"\n Hello, \n Your tickets status has changed to {ticket.Status}. \n Greetings, {ticket.ResponsibleFor?.Name} \n Secret View"; 
+                Guard.Against.Null(conversation);
 
+                var message = $"\n Hello, \n Your tickets status has changed to {ticket.Status}. \n Greetings, {ticket.ResponsibleFor?.Name} \n Secret View"; 
                 await _conversationService.UpdateLog(conversation.Id, message);
 
                 //save changes
@@ -157,6 +167,7 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
+                Guard.Against.Null(joinUserTicket);
 
                 joinUserTicket.InvolvedUser = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == joinUserTicket.UserId);
                 joinUserTicket.Ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == joinUserTicket.TicketId);
@@ -164,8 +175,9 @@ namespace SupportTicketSystem.Services.TicketService
                 
                 // send mail to user of ticket
                 var conversation = await _dataContext.Conversation.FirstOrDefaultAsync(c => c.TicketId == joinUserTicket.Ticket.Id);
-                var message = $"\n Hello, \n Your ticket has more Users involved in the ticket. this user has been added {joinUserTicket.InvolvedUser.Name}. \n Greetings, {joinUserTicket.Ticket.ResponsibleFor?.Name} \n Secret View";
+                Guard.Against.Null(conversation);
 
+                var message = $"\n Hello, \n Your ticket has more Users involved in the ticket. this user has been added {joinUserTicket.InvolvedUser.Name}. \n Greetings, {joinUserTicket.Ticket.ResponsibleFor?.Name} \n Secret View";
                 await _conversationService.UpdateLog(conversation.Id, message);
 
                 await _dataContext.SaveChangesAsync();
@@ -190,6 +202,7 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
+                Guard.Against.Null(ticket);
 
                 int severity = (int)ticket.Severity;
                 if (severity < 5)
@@ -222,6 +235,7 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
+                Guard.Against.Null(ticket);
 
                 int severity = (int)ticket.Severity;
                 if (severity > 0)
@@ -254,6 +268,7 @@ namespace SupportTicketSystem.Services.TicketService
             try
             {
                 var ticket = await _dataContext.Ticket.GetById(id);
+                Guard.Against.Null(ticket);
 
                 ticket.ResponsibleForID = userid;
 
@@ -277,7 +292,9 @@ namespace SupportTicketSystem.Services.TicketService
             var serviceResponse = new ServiceResponse<int>();
 
             List<User> Users = await _dataContext.User.ToListAsync();
+            Guard.Against.Null(Users);
             List<Ticket> Tickets = await _dataContext.Ticket.ToListAsync();
+            Guard.Against.Null(Tickets);
             List<List<int>> AmountResponsibleForPerUser = new List<List<int>>();
             List<int> AmountResponsibleFor = new List<int>();
 
