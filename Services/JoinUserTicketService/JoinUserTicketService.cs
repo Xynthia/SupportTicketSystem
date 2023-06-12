@@ -40,6 +40,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
                 var joinUserTicket = await _dataContext.JoinUserTicket.FirstOrDefaultAsync(j => j.Id == id);
                 Guard.Against.Null(joinUserTicket);
 
+                //joinUserTicket is being archieved
                 joinUserTicket.Archived = DateTime.Now;
 
                 await _dataContext.SaveChangesAsync();
@@ -48,6 +49,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -94,6 +96,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }

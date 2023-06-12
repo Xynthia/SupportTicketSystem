@@ -26,24 +26,29 @@ namespace SupportTicketSystem.Services.ConversationService
 
             var conversation = _mapper.Map<Conversation>(newConversation);
 
+            // make a log that desrializes the json file that we get send
             var postmarkLog = JsonSerializer.Deserialize<PostmarkLogModel>(conversation.Log);
 
+            //get the ticket from the email looks like this ticketid.tickets@mail.com
             var ticketIdSubstring = postmarkLog.To.Substring(0, postmarkLog.To.IndexOf(".tickets"));
             int ticketId = Int32.Parse(ticketIdSubstring);
             var ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == ticketId);
             Guard.Against.Null(ticket);
 
+            //get the from user
             var FromUserEmail = postmarkLog.From;
             var fromUser = await _dataContext.User.FirstOrDefaultAsync(x => x.Email == FromUserEmail);
             Guard.Against.Null(fromUser);
 
+            //set id in conversation
             conversation.FromUserId = fromUser.Id;
             conversation.TicketId = ticket.Id;
             conversation.ToUserId = ticket.ResponsibleForID;
 
-            // if ticket and user excist then add conversation.
+            // if ticket and user excist then add conversation
             if (fromUser != null && ticket != null)
             {
+                //add and save conversation
                 await _dataContext.Conversation.AddAsync(conversation);
                 await _dataContext.SaveChangesAsync();
             }
@@ -57,13 +62,12 @@ namespace SupportTicketSystem.Services.ConversationService
         {
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
-            //remove conversation by id
             try
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
                 Guard.Against.Null(conversation);
 
-                //converstion is being archieved. we can see the time and date. if it is archieved or not.
+                //converstion is being archieved
                 conversation.Archived = DateTime.Now;
 
                 await _dataContext.SaveChangesAsync();
@@ -81,7 +85,6 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<List<GetConversationDto>>> GetAll()
         {
-            // get all conversations
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
             var conversations = await _dataContext.Conversation.GetConversationDtoFromQuery(_mapper);
@@ -94,7 +97,6 @@ namespace SupportTicketSystem.Services.ConversationService
 
         public async Task<ServiceResponse<GetConversationDto>> GetById(int id)
         {
-            // get conversation by id
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
             var conversation = await _dataContext.Conversation.GetById(id);
@@ -108,7 +110,6 @@ namespace SupportTicketSystem.Services.ConversationService
         {
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
-            //update conversation by id.
             try
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
@@ -133,16 +134,18 @@ namespace SupportTicketSystem.Services.ConversationService
         {
             var serviceResponse = new ServiceResponse<GetConversationDto>();
 
-            //update log of conversation
             try
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
                 Guard.Against.Null(conversation);
 
+                // deserialise the json that we get send 
                 var postmarkLog = JsonSerializer.Deserialize<PostmarkLogModel>(conversation.Log);
 
+                // add the new message 
                 postmarkLog.StrippedTextReply = postmarkLog.StrippedTextReply.Insert(0, "\n" + updateLog + "\n ___ reply before this line ___ \n");
 
+                // serialize the postmarklog into conversation
                 conversation.Log = JsonSerializer.Serialize<PostmarkLogModel>(postmarkLog);
 
                 await _dataContext.SaveChangesAsync();

@@ -53,6 +53,7 @@ namespace SupportTicketSystem.Services.UserService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceRepsonse.Succes = false;
                 serviceRepsonse.Message = ex.Message;
             }
@@ -61,7 +62,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetUserDto>>> GetAll()
         {
-            //get all users
             var serviceRespone = new ServiceResponse<List<GetUserDto>>();
 
             var Users = await _dataContext.User.GetUserDtoFromQuery(_mapper);
@@ -74,7 +74,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> GetById(int id)
         {
-            //get user by id
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             var user = await _dataContext.User.GetById(id);
@@ -87,7 +86,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> Update(int id, UpdateUserDto updateUser)
         {
-            //update user by id.
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             try
@@ -102,6 +100,7 @@ namespace SupportTicketSystem.Services.UserService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -111,7 +110,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<GetUserDto>> UpdateSecretView(int id, bool secretview)
         {
-            // update secret view status
             var serviceResponse = new ServiceResponse<GetUserDto>();
 
             try
@@ -126,6 +124,7 @@ namespace SupportTicketSystem.Services.UserService
             }
             catch (Exception ex)
             {
+                //send message when it goes wrong.
                 serviceResponse.Succes = false;
                 serviceResponse.Message = ex.Message;
             }
@@ -135,7 +134,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetTicketDto>>> GetAllCreatedTickets(int id)
         {
-            // get tickets created by user.
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
             
             List<Ticket> tickets = await _dataContext.Ticket.GetByCreatedId(id);
@@ -148,7 +146,6 @@ namespace SupportTicketSystem.Services.UserService
 
         public async Task<ServiceResponse<List<GetJoinUserTicketDto>>> GetAllInvolvedTickets(int id)
         {
-            // get tickets that the user is involved with.
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
             List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.GetByUserId(id);
@@ -158,7 +155,5 @@ namespace SupportTicketSystem.Services.UserService
 
             return serviceResponse;
         }
-
-
     }
 }

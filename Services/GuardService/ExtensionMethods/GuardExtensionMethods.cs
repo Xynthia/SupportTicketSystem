@@ -11,9 +11,10 @@
         /// <exception cref="InvalidOperationException"></exception>
         public static void Null(this IGuardService guardClause ,object argument, string? exception = null)
         {
+            // guard argument against null.
             if (argument == null)
             {
-                var baseException = new ArgumentNullException("Guard xynthia");
+                var baseException = new ArgumentNullException("Guard null");
                 if (baseException != null)
                     throw new InvalidOperationException(exception, baseException);
 
