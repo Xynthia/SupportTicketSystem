@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
@@ -13,10 +12,10 @@ namespace SupportTicketSystem.Services.UserService
 {
     public class UserService : IUserService
     {
-        public IMapper _mapper { get; }
+        public MapperlyProfile _mapper { get; }
         public DataContext _dataContext { get; }
 
-        public UserService(IMapper mapper, DataContext dataContext)
+        public UserService(MapperlyProfile mapper, DataContext dataContext)
         {
             _mapper = mapper;
             _dataContext = dataContext;
@@ -27,7 +26,7 @@ namespace SupportTicketSystem.Services.UserService
             // add user and save
             var serviceResponse = new ServiceResponse<List<GetUserDto>>();
             
-            var user = _mapper.Map<User>(newUser);
+            var user = _mapper.AddUserDtoToUser(newUser);
             Guard.Against.Null(user);
 
             await _dataContext.User.AddAsync(user);
@@ -79,7 +78,7 @@ namespace SupportTicketSystem.Services.UserService
             var user = await _dataContext.User.GetById(id);
             Guard.Against.Null(user);
 
-            serviceResponse.Data = _mapper.Map<GetUserDto>(user);
+            serviceResponse.Data = _mapper.UserToGetUserDto(user);
 
             return serviceResponse;
         }
@@ -92,11 +91,11 @@ namespace SupportTicketSystem.Services.UserService
             {
                 var user = await _dataContext.User.GetById(id);
                 Guard.Against.Null(user);
-                user = _mapper.Map<UpdateUserDto, User>(updateUser, user);
+                user = _mapper.UpdateUserDtoToUser(updateUser);
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetUserDto>(user);
+                serviceResponse.Data = _mapper.UserToGetUserDto(user);
             }
             catch (Exception ex)
             {
@@ -120,7 +119,7 @@ namespace SupportTicketSystem.Services.UserService
                 user.SecretView = secretview;
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetUserDto>(user);
+                serviceResponse.Data = _mapper.UserToGetUserDto(user);
             }
             catch (Exception ex)
             {
@@ -139,7 +138,7 @@ namespace SupportTicketSystem.Services.UserService
             List<Ticket> tickets = await _dataContext.Ticket.GetByCreatedId(id);
             Guard.Against.Null(tickets);
 
-            serviceResponse.Data = _mapper.Map<List<GetTicketDto>>(tickets);
+            serviceResponse.Data = _mapper.TicketsToGetTicketDto(tickets);
 
             return serviceResponse;
         }
@@ -151,7 +150,7 @@ namespace SupportTicketSystem.Services.UserService
             List<JoinUserTicket> involvedUsers = await _dataContext.JoinUserTicket.GetByUserId(id);
             Guard.Against.Null(involvedUsers);
 
-            serviceResponse.Data = _mapper.Map<List<GetJoinUserTicketDto>>(involvedUsers);
+            serviceResponse.Data = _mapper.JoinUserTicketsToGetJoinUserTicketDto(involvedUsers);
 
             return serviceResponse;
         }

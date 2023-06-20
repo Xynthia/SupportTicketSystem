@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Services.GuardService;
@@ -9,20 +8,20 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
 {
     public class JoinUserTicketService : IJoinUserTicketService
     {
-        public JoinUserTicketService(IMapper mapper, DataContext dataContext)
+        public MapperlyProfile _mapper { get; }
+        public DataContext _dataContext { get; }
+
+        public JoinUserTicketService(MapperlyProfile mapper, DataContext dataContext)
         {
             _mapper = mapper;
             _dataContext = dataContext;
         }
 
-        public IMapper _mapper { get; }
-        public DataContext _dataContext { get; }
-
         public async Task<ServiceResponse<List<GetJoinUserTicketDto>>> Add(AddJoinUserTicketDto newJoinUserTicket)
         {
             var serviceResponse = new ServiceResponse<List<GetJoinUserTicketDto>>();
 
-            var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
+            var joinUserTicket = _mapper.AddJoinUserTicketDtoToJoinUserTicket(newJoinUserTicket);
             Guard.Against.Null(joinUserTicket);
 
             await _dataContext.AddAsync(joinUserTicket);
@@ -37,7 +36,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
 
             try
             {
-                var joinUserTicket = await _dataContext.JoinUserTicket.FirstOrDefaultAsync(j => j.Id == id);
+                var joinUserTicket = await _dataContext.JoinUserTicket.FirstAsync(j => j.Id == id);
                 Guard.Against.Null(joinUserTicket);
 
                 //joinUserTicket is being archieved
@@ -75,7 +74,7 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
 
             var joinUserTicket = await _dataContext.JoinUserTicket.GetById(id);
             Guard.Against.Null(joinUserTicket);
-            serviceResponse.Data = _mapper.Map<GetJoinUserTicketDto>(joinUserTicket);
+            serviceResponse.Data = _mapper.JoinUserTicketToGetJoinUserTicketDto(joinUserTicket);
 
             return serviceResponse;
         }
@@ -88,11 +87,12 @@ namespace SupportTicketSystem.Services.JoinUserTicketService
             {
                 var joinUserTicket = await _dataContext.JoinUserTicket.GetById(id);
                 Guard.Against.Null(joinUserTicket);
-                joinUserTicket = _mapper.Map<UpdateJoinUserTicketDto, JoinUserTicket>(updateJoinUserTicket, joinUserTicket);
+
+                joinUserTicket = _mapper.UpdateJoinUserTicketDtoToJoinTicket(updateJoinUserTicket);
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetJoinUserTicketDto>(joinUserTicket);
+                serviceResponse.Data = _mapper.JoinUserTicketToGetJoinUserTicketDto(joinUserTicket);
             }
             catch (Exception ex)
             {

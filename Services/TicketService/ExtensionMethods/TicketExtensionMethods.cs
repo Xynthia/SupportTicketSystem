@@ -1,14 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Dtos.Ticket;
 
 namespace SupportTicketSystem.Services.TicketService.ExtensionMethods
 {
     public static class TicketExtensionMethods
     {
-            public static async Task<List<GetTicketDto>> GetTicketDtoFromQuery(this IQueryable<Ticket> query, IMapper mapper)
+            public static async Task<List<GetTicketDto>> GetTicketDtoFromQuery(this IQueryable<Ticket> query, MapperlyProfile mapper)
             {
-                return await query.Select(c => mapper.Map<GetTicketDto>(c)).ToListAsync();
+                return await query.Select(c => mapper.TicketToGetTicketDto(c)).ToListAsync();
             }
 
             public static async Task<Ticket> GetById(this IQueryable<Ticket> query, int id)

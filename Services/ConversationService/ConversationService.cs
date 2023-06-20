@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.Conversation;
 using SupportTicketSystem.Services.ConversationService.ExtensionMethods;
@@ -12,9 +11,9 @@ namespace SupportTicketSystem.Services.ConversationService
     public class ConversationService : IConversationService
     {
         public DataContext _dataContext { get; }
-        public IMapper _mapper { get; }
+        public MapperlyProfile _mapper { get; }
 
-        public ConversationService(DataContext dataContext, IMapper mapper)
+        public ConversationService(DataContext dataContext, MapperlyProfile mapper)
         {
             _dataContext = dataContext;
             _mapper = mapper;
@@ -24,12 +23,13 @@ namespace SupportTicketSystem.Services.ConversationService
         {
             var serviceResponse = new ServiceResponse<List<GetConversationDto>>();
 
-            var conversation = _mapper.Map<Conversation>(newConversation);
+            var conversation = _mapper.AddConversationDtoToConversation(newConversation);
 
             // make a log that desrializes the json file that we get send
             var postmarkLog = JsonSerializer.Deserialize<PostmarkLogModel>(conversation.Log);
 
             //get the ticket from the email looks like this ticketid.tickets@mail.com
+            var toUserEmail = postmarkLog.To;
             var ticketIdSubstring = postmarkLog.To.Substring(0, postmarkLog.To.IndexOf(".tickets"));
             int ticketId = Int32.Parse(ticketIdSubstring);
             var ticket = await _dataContext.Ticket.FirstOrDefaultAsync(t => t.Id == ticketId);
@@ -101,7 +101,7 @@ namespace SupportTicketSystem.Services.ConversationService
 
             var conversation = await _dataContext.Conversation.GetById(id);
             Guard.Against.Null(conversation);
-            serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
+            serviceResponse.Data = _mapper.ConversationToGetConversationDto(conversation);
 
             return serviceResponse;
         }
@@ -114,11 +114,11 @@ namespace SupportTicketSystem.Services.ConversationService
             {
                 var conversation = await _dataContext.Conversation.GetById(id);
                 Guard.Against.Null(conversation);
-                conversation = _mapper.Map<UpdateConversationDto, Conversation>(updateConversation, conversation);
+                conversation = _mapper.UpdateConversationDtoToConversation(updateConversation);
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
+                serviceResponse.Data = _mapper.ConversationToGetConversationDto(conversation);
             }
             catch (Exception ex)
             {
@@ -150,7 +150,7 @@ namespace SupportTicketSystem.Services.ConversationService
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetConversationDto>(conversation);
+                serviceResponse.Data = _mapper.ConversationToGetConversationDto(conversation);
             }
             catch (Exception ex)
             {

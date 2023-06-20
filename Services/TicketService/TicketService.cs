@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SupportTicketSystem.Data;
 using SupportTicketSystem.Dtos.JoinUserTicket;
 using SupportTicketSystem.Dtos.Ticket;
@@ -14,14 +13,14 @@ namespace SupportTicketSystem.Services.TicketService
     public class TicketService : ITicketService
     {
         public DataContext _dataContext { get; }
-        public IMapper _mapper { get; }
         public IConversationService _conversationService { get; }
+        public MapperlyProfile _mapper { get; }
 
-        public TicketService(DataContext dataContext, IMapper mapper, IConversationService conversationService)
+        public TicketService(DataContext dataContext,  IConversationService conversationService, MapperlyProfile mapper)
         {
             _dataContext = dataContext;
-            _mapper = mapper;
             _conversationService = conversationService;
+            _mapper = mapper;
         }
 
         public async Task<ServiceResponse<List<GetTicketDto>>> Add(AddTicketDto newTicket)
@@ -29,8 +28,7 @@ namespace SupportTicketSystem.Services.TicketService
             var serviceResponse = new ServiceResponse<List<GetTicketDto>>();
 
             //add new ticket and save it
-
-            var ticket = _mapper.Map<Ticket>(newTicket);
+            var ticket = _mapper.AddTicketDtoToTicket(newTicket);
             Guard.Against.Null(ticket);
 
             await _dataContext.Ticket.AddAsync(ticket);
@@ -92,7 +90,7 @@ namespace SupportTicketSystem.Services.TicketService
 
             var ticket = await _dataContext.Ticket.GetById(id);
             Guard.Against.Null(ticket);
-            serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+            serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
 
             return serviceResponse;
         }
@@ -106,11 +104,11 @@ namespace SupportTicketSystem.Services.TicketService
                 var ticket = await _dataContext.Ticket.GetById(id);
                 Guard.Against.Null(ticket);
 
-                ticket = _mapper.Map<UpdateTicketDto, Ticket>(updateTicket, ticket);
+                ticket = _mapper.UpdateTicketDtoToTicket(updateTicket);
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+                serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
             }
             catch (Exception ex)
             {
@@ -144,7 +142,7 @@ namespace SupportTicketSystem.Services.TicketService
                 //save changes
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+                serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
             }
             catch (Exception ex)
             {
@@ -162,7 +160,7 @@ namespace SupportTicketSystem.Services.TicketService
 
             try
             {
-                var joinUserTicket = _mapper.Map<JoinUserTicket>(newJoinUserTicket);
+                var joinUserTicket = _mapper.AddJoinUserTicketDtoToJoinUserTicket(newJoinUserTicket);
                 Guard.Against.Null(joinUserTicket);
 
                 joinUserTicket.InvolvedUser = await _dataContext.User.FirstOrDefaultAsync(u => u.Id == joinUserTicket.UserId);
@@ -210,7 +208,7 @@ namespace SupportTicketSystem.Services.TicketService
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+                serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
             }
             catch (Exception ex)
             {
@@ -241,7 +239,7 @@ namespace SupportTicketSystem.Services.TicketService
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+                serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
             }
             catch (Exception ex)
             {
@@ -265,7 +263,7 @@ namespace SupportTicketSystem.Services.TicketService
 
                 await _dataContext.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetTicketDto>(ticket);
+                serviceResponse.Data = _mapper.TicketToGetTicketDto(ticket);
             }
             catch (Exception ex)
             {
@@ -280,14 +278,16 @@ namespace SupportTicketSystem.Services.TicketService
         {
             var serviceResponse = new ServiceResponse<int>();
 
-            List<Ticket> Tickets = await _dataContext.Ticket.ToListAsync();
+            List<Ticket> Tickets = await _dataContext.Ticket.Include(x => x.ResponsibleFor).ToListAsync();
             Guard.Against.Null(Tickets);
 
             //tickets get grouped by responsiblefor id. ordered by the count of tickets. returns first or default resposible for id.
             var userIdWithLeastAmount = Tickets
+                .Where(x => x.ResponsibleFor != null && x.ResponsibleFor.SecretView)
                 .GroupBy(x => x.ResponsibleForID)
                 .OrderBy(x => x.Count())
                 .FirstOrDefault()?.Key;
+
             Guard.Against.Null(userIdWithLeastAmount);
 
             serviceResponse.Data = userIdWithLeastAmount.Value;

@@ -6,16 +6,13 @@ using SupportTicketSystem.Data;
 using SupportTicketSystem.Services.ConversationService;
 using SupportTicketSystem.Services.JoinUserTicketService;
 using SupportTicketSystem.Services.BackgroundWorkerService;
+using SupportTicketSystem;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-
-builder.Services.AddHostedService<BackgroundWorkerService>();
-
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -25,15 +22,14 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
 builder.Services.AddScoped<IJoinUserTicketService, JoinUserTicketService>();
+builder.Services.AddScoped<MapperlyProfile>();
 builder.Services.AddHostedService<BackgroundWorkerService>();
 
 builder.Services.AddDbContext<DataContext>();
-
 
 var app = builder.Build();
 
